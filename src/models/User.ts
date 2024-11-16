@@ -17,8 +17,8 @@ interface IPersonalInfo {
 }
 
 interface IContactInfo {
-    phoneNumber: string;
-    email: string;
+  phoneNumber: string;
+  email: string;
 }
 
 interface IAddress {
@@ -58,12 +58,12 @@ interface IFamilyInfo {
   familyType: string;
 }
 
-interface IUser {
+export interface IUser {
   createdBy: Schema.Types.ObjectId;
 
   personalInfo: IPersonalInfo;
 
-  contactInfo: IContactInfo
+  contactInfo: IContactInfo;
 
   // residential address
   residentialAddr: IAddress;
@@ -83,5 +83,79 @@ interface IUser {
   isApproved: boolean;
 
   tags: [string];
-
 }
+
+const userSchema = new Schema<IUser>(
+  {
+    createdBy: { type: Schema.Types.ObjectId, required: true },
+
+    personalInfo: {
+      firstname: { type: String, required: true },
+      middleName: { type: String },
+      lastName: { type: String, required: true },
+      gender: { type: String, required: true },
+      dob: { type: Date, required: true },
+      bloodGroup: { type: String },
+      height: { type: Number },
+      weight: { type: Number },
+      complexion: { type: String },
+      hobbies: [{ type: String }],
+      aboutMe: { type: String },
+      profileImages: [{ type: String }],
+    },
+
+    contactInfo: {
+      phoneNumber: { type: String, required: true },
+      email: { type: String, required: true },
+    },
+    residentialAddr: {
+      address: { type: String },
+      locality: { type: String },
+      city: { type: String },
+      district: { type: String },
+      state: { type: String },
+      pincode: { type: String },
+    },
+    permanentAddr: {
+      address: { type: String },
+      locality: { type: String },
+      city: { type: String },
+      district: { type: String },
+      state: { type: String },
+      pincode: { type: String },
+    },
+    eduAndProfInfo: {
+      highestEducation: { type: String },
+      otherEductionDetail: { type: String },
+      jobType: { type: String },
+      designation: { type: String },
+      workDetail: { type: String },
+      income: { type: Number },
+    },
+    cultureAndReligiousInfo: {
+      religion: { type: String },
+      caste: { type: String },
+      subCaste: { type: String },
+      gotra: { type: String },
+      raasi: { type: String },
+    },
+    familyInfo: {
+      fatherName: { type: String },
+      fatherOccupation: { type: String },
+      motherName: { type: String },
+      motherOccupation: { type: String },
+      noOfSiblings: { type: Number },
+      noOfBrothers: { type: Number },
+      noOfSisters: { type: Number },
+      familyType: { type: String },
+    },
+    spouseExpctation: { type: String },
+    isApproved: { type: Boolean, default: false },
+    tags: [{ type: String }],
+  },
+  { timestamps: true }
+);
+
+const UserModel = mongoose.models.User || model<IUser>("User", userSchema);
+
+export default UserModel;
