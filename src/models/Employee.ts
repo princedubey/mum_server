@@ -17,7 +17,7 @@ import mongoose, { Schema, model } from "mongoose";
  * @property {[boolean]} isActive - Status of the employee
  */
 export interface IEmployee {
-  createdBy: string; // The id of the admin who created the employee
+  createdBy: string | null; // The id of the admin who created the employee
   firstName: string;
   lastName: string;
   email: string;

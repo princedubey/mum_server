@@ -15,8 +15,10 @@ const app = express()
 app.use(express.json({limit: '50mb'}))
 app.use(cookieParser())
 app.use(morgan('dev'))
+
+// for development i am [Vikash] allowing * later on we will strict cors requests
 app.use(cors({
-  origin: process.env.ORIGIN,
+  origin: "*",
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
 }))
 

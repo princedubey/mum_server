@@ -30,7 +30,24 @@ export const generateToken = (user: User, type: "access" | "refresh" = "access")
 
 // Middleware to authenticate JWT token
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const token = req.headers.authorization;
+  const cookies = req.headers.cookie
+  
+  let token: string | undefined;
+
+  if(!token){
+    token = req.headers.authorization;
+  }
+  
+  if(cookies){
+    const cookieArray = cookies.split(';')
+    const authTokenCookies = cookieArray.find(cookie => cookie.trim().startsWith('access_token'));
+    if(authTokenCookies){
+      token = authTokenCookies.split('=')[1].trim();
+    }
+  
+    
+  }
+  
 
   if (!token) {
     res.status(403).json({
@@ -43,6 +60,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined in environment variables.");
   }
+
 
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {

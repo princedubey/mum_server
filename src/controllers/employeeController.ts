@@ -2,21 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import employeesModel from "../models/Employee";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
+import { JwtPayload } from "jsonwebtoken";
+import { IEmployee } from "../models/Employee";
 
 // Register Employee
 export const registerEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { firstName, lastName, email, phoneNumber, post, designation, postingPlace, role, access, password }: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phoneNumber: string;
-    post: string;
-    designation: string;
-    postingPlace: string;
-    role: string;
-    access: string[];
-    password: string;
-  } = req.body;
+  const { firstName, lastName, email, phoneNumber, post, designation, postingPlace, role, access, password }: IEmployee = req.body;
 
   try {
     // Check if employee already exists
@@ -113,7 +104,17 @@ export const loginEmployee = async (req: Request, res: Response, next: NextFunct
 // Get Employee Profile
 export const getEmployeeProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const employee = await employeesModel.findById(req.user); // TODO
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+      return;
+    }
+
+    const id: string = (req.user as JwtPayload)._id;
+    
+    const employee = await employeesModel.findById(id);
     if (!employee) {
       res.status(404).json({
         success: false,
