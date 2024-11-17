@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import UserModel from "../models/User";
+import UserModel, { IUser } from "../models/User";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
 
 // Register User

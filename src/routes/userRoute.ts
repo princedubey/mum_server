@@ -38,7 +38,7 @@ router.get(
     authenticateToken, // Middleware to authenticate the user
   ],
   (req: Request, res: Response, next: NextFunction) => {
-    const { user_id } = req.params;
+    // const { user_id } = req.params;
     getUserProfile(req, res, next);
   }
 );

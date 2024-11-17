@@ -34,11 +34,9 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
   
   let token: string | undefined;
 
-  if(!token){
-    token = req.headers.authorization;
-  }
+  token = req.headers.authorization;
   
-  if(cookies){
+  if(!token && cookies){
     const cookieArray = cookies.split(';')
     const authTokenCookies = cookieArray.find(cookie => cookie.trim().startsWith('access_token'));
     if(authTokenCookies){
