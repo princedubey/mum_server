@@ -11,7 +11,7 @@ const favouriteSchema = new Schema<Favourite>({
   userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
   likedBy: { type: String, required: true },
 },{timestamps:true, versionKey: false});
-
+ 
 
 const FavouriteModel = mongoose.models?.Favourite || model<Favourite>("Favourite", favouriteSchema);
 
