@@ -4,6 +4,7 @@ import employeesModel from "../models/Employee";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
 import { JwtPayload } from "jsonwebtoken";
 import { IEmployee } from "../models/Employee";
+import { sendEmailWithCredentials } from "../config/mailer";
 
 // Register Employee
 export const registerEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -37,6 +38,9 @@ export const registerEmployee = async (req: Request, res: Response, next: NextFu
       isActive: true,
     });
     await newEmployee.save();
+
+    // Send email with password
+    await sendEmailWithCredentials(email, email, password)
 
     res.status(201).json({
       success: true,
@@ -89,7 +93,7 @@ export const loginEmployee = async (req: Request, res: Response, next: NextFunct
       success: true,
       message: "Employee Login Successfully",
       data: {
-        employeeId: employee._id,
+        _id: employee._id,
         name: employee.firstName + ' ' + employee.lastName,
         email: employee.email,
         role: employee.role,
