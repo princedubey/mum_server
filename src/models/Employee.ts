@@ -5,6 +5,7 @@ import mongoose, { Schema, model } from "mongoose";
  * @property {string} firstName - The first name of the employee.
  * @property {string} lastName - The last name of the employee.
  * @property {string} email - The email address of the employee.
+ * @property {string} password - The password of the employee.
  * @property {string} phoneNumber - The phone number of the employee.
  * @property {string} post - The job post of the employee.
  * @property {string} designation - The designation or job title of the employee.
@@ -20,6 +21,7 @@ export interface IEmployee {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   phoneNumber: string;
   post: string;
   designation: string;
@@ -33,10 +35,11 @@ export interface IEmployee {
 
 const employeeSchema = new Schema<IEmployee>(
   {
-    createdBy: { type: String, required: true },
+    createdBy: { type: String, required: false },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     post: { type: String, required: true },
     designation: { type: String, required: true },
@@ -47,7 +50,7 @@ const employeeSchema = new Schema<IEmployee>(
     ],
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false },
 );
 
 const EmployeeModel =

@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 
 interface IPersonalInfo {
   // Personal information
-  firstname: string;
+  firstName: string;
   middleName: string;
   lastName: string;
   gender: string;
