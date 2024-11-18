@@ -5,6 +5,7 @@ import {
   getEmployeeProfile,
   loginEmployee,
   registerEmployee,
+  getAllEmployees,
 } from "../controllers/employeeController";
 import {
   registerEmployeeSchema,
@@ -43,10 +44,14 @@ router.get(
   }
 );
 
+
 router.get(
-  "/all",
+  "/",
+  [
+    authenticateToken,
+  ],
   (req: Request, res: Response, next: NextFunction) => {
-    res.send("All Employees");
+    getAllEmployees(req, res, next); //
   }
 )
 
