@@ -43,4 +43,11 @@ router.get(
   }
 );
 
+router.get(
+  "/all",
+  (req: Request, res: Response, next: NextFunction) => {
+    res.send("All Employees");
+  }
+)
+
 export default router;

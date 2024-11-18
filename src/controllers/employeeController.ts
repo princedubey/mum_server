@@ -135,3 +135,17 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
     next(error);
   }
 };
+
+// Get All Employees
+export const getAllEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const employees = await employeesModel.find();
+    res.status(200).json({
+      success: true,
+      message: "All Employees fetched Successfully",
+      data: employees,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
