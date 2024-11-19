@@ -5,6 +5,7 @@ import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
 import { JwtPayload } from "jsonwebtoken";
 import { IEmployee } from "../models/Employee";
 import { sendEmailWithCredentials } from "../config/mailer";
+import { AppError } from "../middlewares/errorHandler";
 
 // Register Employee
 export const registerEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -54,32 +55,22 @@ export const registerEmployee = async (req: Request, res: Response, next: NextFu
 // Login Employee
 export const loginEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { email, password }: { email: string; password: string } = req.body;
-
   try {
     // Find employee by email
     const employee = await employeesModel.findOne({ email });
     if (!employee) {
-      res.status(400).json({
-        success: false,
-        message: "Employee not found",
-      });
+      throw new AppError("Couldn't find employee",404)
     }
 
     // Check if employee is active
     if (!employee.isActive) {
-      res.status(400).json({
-        success: false,
-        message: "Employee not active",
-      });
+      throw new AppError("Employee is not active",400)
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, employee.password);
     if (!isMatch) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid email or password",
-      });
+      throw new AppError("Email or login not matched",400)
     }
 
     // Generate JWT tokens
@@ -88,6 +79,7 @@ export const loginEmployee = async (req: Request, res: Response, next: NextFunct
 
     // Set tokens in cookies
     setTokensInCookies(res, accessToken, refreshToken);
+
 
     res.status(200).json({
       success: true,

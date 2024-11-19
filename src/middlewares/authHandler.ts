@@ -78,7 +78,6 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 export const setTokensInCookies = (res: Response, accessToken: string, refreshToken: string): void => {
   const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
   const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-
   res.cookie("access_token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "PROD",

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import UserModel, { IUser } from "../models/User";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
+import { AppError } from "../middlewares/errorHandler";
 
 // Register User
 export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -66,19 +67,13 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     // Find user by email
     const user = await UserModel.findOne({ "contactInfo.email": email });
     if (!user) {
-      res.status(400).json({
-        success: false,
-        message: "User not found",
-      });
+      throw new AppError("User not found",404)
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.contactInfo.password);
     if (!isMatch) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid email or password",
-      });
+      throw new AppError("Invalid email or password",404)
     }
 
     // Generate JWT tokens
@@ -112,6 +107,7 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
         success: false,
         message: "User not found",
       });
+      return;
     }
 
     res.status(200).json({
