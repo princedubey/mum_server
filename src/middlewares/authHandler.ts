@@ -7,6 +7,8 @@ dotenv.config();
 // Define a custom type for user objects
 interface User {
   _id: string;
+  email:string;
+  role:string;
 }
 
 // Add custom property to the Request interface for storing user info
@@ -31,19 +33,30 @@ export const generateToken = (user: User, type: "access" | "refresh" = "access")
 // Middleware to authenticate JWT token
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const cookies = req.headers.cookie
-  
+ 
   let token: string | undefined;
+  let role: string | undefined
 
   token = req.headers.authorization;
-  
+  // console.log("request received in token veri",req.headers)
   if(!token && cookies){
     const cookieArray = cookies.split(';')
     const authTokenCookies = cookieArray.find(cookie => cookie.trim().startsWith('access_token'));
+    const roleCookies = cookieArray.find(cookie => cookie.trim().startsWith('role'));
     if(authTokenCookies){
       token = authTokenCookies.split('=')[1].trim();
     }
-  
-    
+    if(roleCookies){
+      role = roleCookies.split('=')[1].trim();
+    }
+  }
+
+  if(role !== "admin" && role !== "employee"){
+    res.status(403).json({
+      success: false,
+      message: "Invaid Role ",
+    });
+    return;
   }
   
 

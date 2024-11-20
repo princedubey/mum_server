@@ -109,13 +109,13 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
     }
 
     const id: string = (req.user as JwtPayload)._id;
-    
     const employee = await employeesModel.findById(id);
     if (!employee) {
       res.status(404).json({
         success: false,
         message: "Employee not found",
       });
+      return;
     }
 
     res.status(200).json({
@@ -123,6 +123,7 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
       message: "Employee Profile fetched Successfully",
       data: employee,
     });
+    console.log("Employee profile fetched",employee)
   } catch (error) {
     next(error);
   }

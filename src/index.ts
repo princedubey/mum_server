@@ -16,9 +16,14 @@ app.use(express.json({limit: '50mb'}))
 app.use(cookieParser())
 app.use(morgan('dev'))
 
-// for development i am [Vikash] allowing * later on we will strict cors requests
+
+// Apply CORS middleware to allow cross-origin requests
 app.use(cors({
-  origin: "*",
+  origin: ["http://localhost:3001","http://localhost:3000"],
+  credentials: true,
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Authorization', 'Content-Length'],
+  exposedHeaders: ['Content-Length'],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various versions of Android) choke on 204
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
 }))
 

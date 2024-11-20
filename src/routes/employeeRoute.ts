@@ -34,12 +34,14 @@ router.post(
 
 // Get Employee Profile
 router.get(
-  "/profile/:employee_id",
+  "/profile/:id",
   [
     authenticateToken, // Middleware to authenticate the employee
   ],
   (req: Request, res: Response, next: NextFunction) => {
-    const { employee_id } = req.params;
+    const { id } = req.params;
+    console.log("Request received")
+
     getEmployeeProfile(req, res, next);
   }
 );
