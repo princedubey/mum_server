@@ -20,6 +20,8 @@
   "homepage": "https://github.com/chiggosVikash/mum_backend#readme",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.698.0",
+    "@aws-sdk/s3-request-presigner": "^3.698.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

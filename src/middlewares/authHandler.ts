@@ -51,6 +51,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
   }
 
+  console.log("token received",token)
   if(role !== "admin" && role !== "employee"){
     res.status(403).json({
       success: false,
