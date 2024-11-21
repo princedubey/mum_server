@@ -27,6 +27,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
 }))
 
+
 app.get('/health',(_,res)=>{
     res.status(200).json({message:'Server is running'})
 })
