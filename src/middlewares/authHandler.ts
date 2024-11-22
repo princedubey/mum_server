@@ -51,7 +51,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
   }
 
-  console.log("token received",token)
+  console.log("token received",req.headers)
   if(role !== "admin" && role !== "employee"){
     res.status(403).json({
       success: false,
@@ -92,14 +92,18 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 export const setTokensInCookies = (res: Response, accessToken: string, refreshToken: string): void => {
   const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
   const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  // res.setHeader('Set-Cookie',`access_token=${accessToken}'; Path=/; Max-Age=${sevenDays}`)
+  // res.setHeader('Set-Cookie',`refresh_token=${refreshToken}'; Path=/; Max-Age=${oneHour}`)
   res.cookie("access_token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "PROD",
-    maxAge: oneHour,
+    maxAge: sevenDays,
+    expires: new Date(sevenDays),
+    path: "/",
   });
 
   res.cookie("refresh_token", refreshToken, {
-    httpOnly: true,
+    httpOnly: true, // httpOnly
     secure: process.env.NODE_ENV === "PROD",
     maxAge: sevenDays,
   });
