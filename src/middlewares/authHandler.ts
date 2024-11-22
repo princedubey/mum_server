@@ -32,27 +32,22 @@ export const generateToken = (user: User, type: "access" | "refresh" = "access")
 
 // Middleware to authenticate JWT token
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const cookies = req.headers.cookie
  
-  let token: string | undefined;
-  let role: string | undefined
 
-  token = req.headers.authorization;
-  // console.log("request received in token veri",req.headers)
-  if(!token && cookies){
-    const cookieArray = cookies.split(';')
-    const authTokenCookies = cookieArray.find(cookie => cookie.trim().startsWith('access_token'));
-    const roleCookies = cookieArray.find(cookie => cookie.trim().startsWith('role'));
-    if(authTokenCookies){
-      token = authTokenCookies.split('=')[1].trim();
-    }
-    if(roleCookies){
-      role = roleCookies.split('=')[1].trim();
-    }
+
+  const authorization = req.headers.authorization;
+  if(!authorization){
+    res.status(403).json({
+      success: false,
+      message: "Access denied. No token provided.",
+    });
+    return;
   }
+  const parsedToken = parseTokenAndRole(authorization);
 
-  console.log("token received",req.headers)
-  if(role !== "admin" && role !== "employee"){
+
+  console.log("token received",req.headers.authorization)
+  if(parsedToken.role !== "admin" && parsedToken.role !== "employee"){
     res.status(403).json({
       success: false,
       message: "Invaid Role ",
@@ -61,7 +56,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
   }
   
 
-  if (!token) {
+  if (!parsedToken.token) {
     res.status(403).json({
       success: false,
       message: "Access denied. No token provided.",
@@ -74,7 +69,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
   }
 
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+  jwt.verify(parsedToken.token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       res.status(403).json({
         success: false,
@@ -98,8 +93,6 @@ export const setTokensInCookies = (res: Response, accessToken: string, refreshTo
     httpOnly: true,
     secure: process.env.NODE_ENV === "PROD",
     maxAge: sevenDays,
-    expires: new Date(sevenDays),
-    path: "/",
   });
 
   res.cookie("refresh_token", refreshToken, {
@@ -108,3 +101,17 @@ export const setTokensInCookies = (res: Response, accessToken: string, refreshTo
     maxAge: sevenDays,
   });
 };
+
+
+function parseTokenAndRole(input: string): { token: string; role: string } {
+  const [tokenPart, rolePart] = input.split(";").map(part => part.trim());
+  
+  if (!tokenPart.startsWith("Bearer ") || !rolePart.startsWith("role=")) {
+      throw new Error("Invalid input format");
+  }
+
+  return {
+      token: tokenPart.slice(7), // Remove "Bearer " (7 characters)
+      role: rolePart.slice(5)    // Remove "role=" (5 characters)
+  };
+}
