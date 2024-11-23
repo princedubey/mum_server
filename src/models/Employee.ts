@@ -15,6 +15,7 @@ import mongoose, { Schema, model } from "mongoose";
  * @property {[string]} createdAt - Creation date of the employee
  * @property {[string]} updatedAt - Last update date of the employee
  * @property {[boolean]} isActive - Status of the employee
+ * @property {[string]} employeeId - Id of the employee
  */
 export interface IEmployee {
   createdBy: string | null; // The id of the admin who created the employee
@@ -31,6 +32,8 @@ export interface IEmployee {
   createdAt: string;
   updatedAt: string;
   isActive: boolean; // whether the employee is currently active or not
+  employeeId: string; // the id of the employee
+  companyName: string; // company name
 }
 
 const employeeSchema = new Schema<IEmployee>(
@@ -45,12 +48,12 @@ const employeeSchema = new Schema<IEmployee>(
     designation: { type: String, required: true },
     postingPlace: { type: String, required: true },
     role: { type: String, required: true, enum: ["admin", "employee"] },
-    access: [
-      { type: String, required: true, enum: ["edit", "read", "delete"] },
-    ],
+    access: [{ type: String, required: true }],
     isActive: { type: Boolean, default: true },
+    employeeId: { type: String, default: "NA" },
+    companyName: { type: String, default: "NA" }, // company name for employee's details
   },
-  { timestamps: true, versionKey: false },
+  { timestamps: true, versionKey: false }
 );
 
 const EmployeeModel =

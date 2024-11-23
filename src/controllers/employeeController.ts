@@ -1,7 +1,18 @@
 import { Request, Response, NextFunction } from "express";
+
+interface CustomRequest extends Request {
+  parsedFilterParams?: {
+    query?: object;
+    skip?: number;
+    limit?: number;
+    sort?: object | null;
+    projection?: object;
+  };
+}
 import bcrypt from "bcrypt";
 import employeesModel from "../models/Employee";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
+import { SortOrder } from "mongoose";
 import { JwtPayload } from "jsonwebtoken";
 import { IEmployee } from "../models/Employee";
 import { sendEmailWithCredentials } from "../config/mailer";
@@ -9,9 +20,10 @@ import { AppError } from "../middlewares/errorHandler";
 
 // Register Employee
 export const registerEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { firstName, lastName, email, phoneNumber, post, designation, postingPlace, role, access, password }: IEmployee = req.body;
+  const { firstName, lastName, email, phoneNumber, post, designation, postingPlace, role, access, password,employeeId,companyName}: IEmployee = req.body;
 
   try {
+    console.log("Register employee")
     // Check if employee already exists
     const employeeExists = await employeesModel.findOne({ email });
     if (employeeExists) {
@@ -37,6 +49,8 @@ export const registerEmployee = async (req: Request, res: Response, next: NextFu
       access,
       password: hashedPassword,
       isActive: true,
+      employeeId,
+      companyName,
     });
     await newEmployee.save();
 
@@ -56,6 +70,7 @@ export const registerEmployee = async (req: Request, res: Response, next: NextFu
 export const loginEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { email, password }: { email: string; password: string } = req.body;
   try {
+    console.log("login ",email)
     // Find employee by email
     const employee = await employeesModel.findOne({ email });
     if (!employee) {
@@ -128,21 +143,61 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
   }
 };
 
-// Get All Employees
-export const getAllEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // const filterParams: Request = req.parsedFilterParams
+// // Get All Employees
+// export const getAllEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+//   try {
+//     const filterParams = req.query;
+//     const limit = parseInt((filterParams.limit as string) ?? "0")
+//     const skip = parseInt((filterParams.skip as string) ?? "0")
+//     const sortParams = req.query.sort as string | undefined;
+//     const queryParms = filterParams.query as string | undefined;
+//     console.log(filterParams)
+//     const employees = await employeesModel.find({}).limit(limit).skip(skip).sort(sortParams ? JSON.parse(sortParams) : undefined);
+//     res.status(200).json({
+//       success: true,
+//       message: "All Employees fetched Successfully",
+//       data: employees,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// }
 
-    const employees = await employeesModel.find({});
+export const getAllEmployees = async (
+  req: CustomRequest, // Use CustomRequest to access parsedFilterParams
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    // Use parsedFilterParams from middleware
+    const {
+      query = {},
+      skip = 0,
+      limit = 0,
+      sort = null,
+      projection = {},
+    } = req.parsedFilterParams || {}; // Fallback to defaults in case middleware is not applied
+
+    console.log("Filter Parameters:", req.parsedFilterParams);
+
+    // Fetch employees from the database using parsed parameters
+    const employees = await employeesModel
+      .find(query)
+      .skip(skip)
+      .limit(limit || 0) // MongoDB interprets 0 as no limit
+      .sort(sort as string | { [key: string]: SortOrder | { $meta: any; }; } | [string, SortOrder][] | null | undefined)
+      .select(projection as string | string[] | Record<string, string | number | boolean | object>); // Apply projection if provided
+
     res.status(200).json({
       success: true,
-      message: "All Employees fetched Successfully",
+      message: "All Employees fetched successfully",
       data: employees,
     });
   } catch (error) {
-    next(error);
+    next(error); // Pass errors to the error-handling middleware
   }
-}
+};
+
 
 // Update Employee Profile from Employee Profile Model
 export const updateEmployeeProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

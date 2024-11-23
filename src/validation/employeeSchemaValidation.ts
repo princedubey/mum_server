@@ -18,9 +18,11 @@ export const registerEmployeeSchema = z.object({
       });
     }
   }),
-  access: z.array(z.enum(["edit", "read", "delete"])).min(1, "At least one access permission must be provided"),
+  access: z.array(z.string()).min(1, "At least one access permission must be provided"),
   password: z.string().min(6, "Password must be at least 6 characters").max(128, "Password must be at most 128 characters"),
   isActive: z.boolean().optional(), // Optional field; defaults to true in the database
+  employeeId: z.string().optional(), // Optional field; defaults to "NA" in the database
+  companyName: z.string().optional(), // Optional field; defaults to "NA" in the database
 });
 
 // Schema for employee login
