@@ -9,7 +9,7 @@ import loginRoute from './loginRoute';
 router.use('/users', userRoute);
 
 // Use the employeeRoute for any routes defined in employeeRoute
-router.use('/employee', employeeRoute);
+router.use(employeeRoute);
 router.use("/login",loginRoute);
 
 export default router;

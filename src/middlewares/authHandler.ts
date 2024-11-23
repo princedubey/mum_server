@@ -26,40 +26,27 @@ export const generateToken = (user: User, type: "access" | "refresh" = "access")
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined in environment variables.");
   }
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn });
-  return token;
+  return jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn });
 };
 
 // Middleware to authenticate JWT token
-export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
- 
-
-
+export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
   const authorization = req.headers.authorization;
-  if(!authorization){
+
+  if (!authorization) {
     res.status(403).json({
       success: false,
       message: "Access denied. No token provided.",
     });
     return;
   }
-  const parsedToken = parseTokenAndRole(authorization);
 
+  const token = extractBearerToken(authorization);
 
-  console.log("token received",req.headers.authorization)
-  if(parsedToken.role !== "admin" && parsedToken.role !== "employee"){
+  if (!token) {
     res.status(403).json({
       success: false,
-      message: "Invaid Role ",
-    });
-    return;
-  }
-  
-
-  if (!parsedToken.token) {
-    res.status(403).json({
-      success: false,
-      message: "Access denied. No token provided.",
+      message: "Access denied. Invalid token format.",
     });
     return;
   }
@@ -68,12 +55,11 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     throw new Error("JWT_SECRET is not defined in environment variables.");
   }
 
-
-  jwt.verify(parsedToken.token, process.env.JWT_SECRET, async (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       res.status(403).json({
         success: false,
-        message: "Access denied. Invalid token.",
+        message: "Access denied. Invalid or expired token.",
       });
       return;
     }
@@ -83,12 +69,11 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
   });
 };
 
-// Middleware to handle expired JWT tokens
+// Function to set JWT tokens in cookies
 export const setTokensInCookies = (res: Response, accessToken: string, refreshToken: string): void => {
   const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
   const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-  // res.setHeader('Set-Cookie',`access_token=${accessToken}'; Path=/; Max-Age=${sevenDays}`)
-  // res.setHeader('Set-Cookie',`refresh_token=${refreshToken}'; Path=/; Max-Age=${oneHour}`)
+
   res.cookie("access_token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "PROD",
@@ -96,22 +81,16 @@ export const setTokensInCookies = (res: Response, accessToken: string, refreshTo
   });
 
   res.cookie("refresh_token", refreshToken, {
-    httpOnly: true, // httpOnly
+    httpOnly: true,
     secure: process.env.NODE_ENV === "PROD",
     maxAge: sevenDays,
   });
 };
 
-
-function parseTokenAndRole(input: string): { token: string; role: string } {
-  const [tokenPart, rolePart] = input.split(";").map(part => part.trim());
-  
-  if (!tokenPart.startsWith("Bearer ") || !rolePart.startsWith("role=")) {
-      throw new Error("Invalid input format");
+// Helper function to extract token from Authorization header
+const extractBearerToken = (authorization: string): string | null => {
+  if (authorization.startsWith("Bearer ")) {
+    return authorization.slice(7);
   }
-
-  return {
-      token: tokenPart.slice(7), // Remove "Bearer " (7 characters)
-      role: rolePart.slice(5)    // Remove "role=" (5 characters)
-  };
-}
+  return authorization;
+};

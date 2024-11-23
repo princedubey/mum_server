@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import UserModel, { IUser } from "../models/User";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
 import { AppError } from "../middlewares/errorHandler";
+import { JwtPayload } from "jsonwebtoken";
 
 // Register User
 export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -101,7 +102,8 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 // Get User Profile
 export const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const user = await UserModel.findById(req.user); //TODO
+    const id: string = (req.user as JwtPayload)._id;
+    const user = await UserModel.findById(id);
     if (!user) {
       res.status(404).json({
         success: false,
@@ -119,3 +121,49 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+// update user by id from admin
+export const updateUserByAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId: string = req.params.id;
+    const user = await UserModel.findByIdAndUpdate(userId, req.body, { new: true });
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// delete user by id from admin
+
+export const deleteUserByAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId: string = req.params.id;
+    const user = await UserModel.findByIdAndDelete(userId);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -123,7 +123,6 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
       message: "Employee Profile fetched Successfully",
       data: employee,
     });
-    console.log("Employee profile fetched",employee)
   } catch (error) {
     next(error);
   }
@@ -132,6 +131,8 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
 // Get All Employees
 export const getAllEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // const filterParams: Request = req.parsedFilterParams
+
     const employees = await employeesModel.find({});
     res.status(200).json({
       success: true,
@@ -142,3 +143,74 @@ export const getAllEmployees = async (req: Request, res: Response, next: NextFun
     next(error);
   }
 }
+
+// Update Employee Profile from Employee Profile Model
+export const updateEmployeeProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const employeeId: string = (req.user as JwtPayload)._id;
+    const employee = await employeesModel.findByIdAndUpdate(employeeId, req.body, { new: true });
+
+    if (!employee) {
+      res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Employee profile updated successfully",
+      data: employee,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// update employee by employee id
+export const updateEmployeeById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const employeeId: string = req.params.id;
+    const employee = await employeesModel.findByIdAndUpdate(employeeId, req.body, { new: true });
+
+    if (!employee) {
+      res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Employee updated successfully",
+      data: employee,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete Employee by id from admin
+export const deleteEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const employeeId: string = req.params.id;
+    const employee = await employeesModel.findByIdAndDelete(employeeId);
+
+    if (!employee) {
+      res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Employee deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
