@@ -31,7 +31,11 @@ export const generateToken = (user: User, type: "access" | "refresh" = "access")
 
 // Middleware to authenticate JWT token
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
-  const authorization = req.headers.authorization;
+  let authorization = req.headers.authorization;
+
+  if (req.headers.cookie) {
+    authorization = req.headers.cookie.split("; ")[0].slice(13);
+  }
 
   if (!authorization) {
     res.status(403).json({

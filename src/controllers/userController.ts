@@ -4,6 +4,8 @@ import UserModel, { IUser } from "../models/User";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
 import { AppError } from "../middlewares/errorHandler";
 import { JwtPayload } from "jsonwebtoken";
+import { CustomRequest } from "../middlewares/validationMiddleware";
+import { SortOrder } from "mongoose";
 
 // Register User
 export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -167,3 +169,34 @@ export const deleteUserByAdmin = async (req: Request, res: Response, next: NextF
     next(error);
   }
 }
+
+export const getAllUsers = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const {
+      query = {},
+      skip = 0,
+      limit = 0,
+      sort = null,
+      projection = {},
+    } = req.parsedFilterParams || {};
+
+    const employees = await UserModel
+      .find(query)
+      .skip(skip)
+      .limit(limit || 0)
+      .sort(sort as string | { [key: string]: SortOrder | { $meta: any; }; } | [string, SortOrder][] | null | undefined)
+      .select(projection as string | string[] | Record<string, string | number | boolean | object>);
+
+    res.status(200).json({
+      success: true,
+      message: "All Users fetched successfully",
+      data: employees,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

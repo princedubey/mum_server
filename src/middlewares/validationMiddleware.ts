@@ -21,7 +21,7 @@ export const validateSchema = (schema: AnyZodObject) => (req: Request, res: Resp
   }
 };
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
   parsedFilterParams?: {
     query: Record<string, any>;
     skip: number;
@@ -30,46 +30,6 @@ interface CustomRequest extends Request {
     projection: Record<string, any>;
   };
 }
-
-// export const parseFilterParams = async (
-//   req: CustomRequest,
-//   res: Response,
-//   next: NextFunction
-// ): Promise<void> => {
-//   let {
-//     page = 1,
-//     limit = 10,
-//     skip = 0,
-//     sort = null,
-//     get_all,
-//     order_type,
-//     order_by,
-//   } = req.query as Record<string, any>;
-
-//   // console.log(req.query)
-//   // Convert query params to expected types
-//   page = Number(page);
-//   limit = get_all ? null : Number(limit);
-//   skip = get_all ? 0 : (page - 1) * (limit as number);
-
-//   const sortObj: Record<string, number> = {};
-//   if (order_by) {
-//     sortObj[order_by] = order_type === 'desc' ? -1 : 1;
-//   }
-
-//   req.query = {
-//     query: {},
-//     skip,
-//     limit,
-//     sort: order_by ? JSON.stringify(sortObj) : undefined,
-//     projection: {},
-//   };
-
-//   next();
-// };
-
-// example to send request parameters
-// GET /all-employee?page=2&limit=10&order_by=name&order_type=asc&projection=name,email,department
 
 export const parseFilterParams = async (
   req: CustomRequest,
@@ -136,3 +96,20 @@ export const adminValidation = (
     next();
 };
 
+export const adminOrEmployeeValidation = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const { role } = req.user as { role: string };
+  if (role !== "admin" && role !== "employee") {
+    res.status(403).json({
+      success: false,
+      message: "Access denied!",
+      error_code: "INVALID_ACCESS",
+    });
+    return;
+  }
+
+  next();
+};

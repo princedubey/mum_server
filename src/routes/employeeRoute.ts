@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import { authenticateToken } from "../middlewares/authHandler";
-import { adminValidation, parseFilterParams, validateSchema } from "../middlewares/validationMiddleware";
+import { adminOrEmployeeValidation, adminValidation, parseFilterParams, validateSchema } from "../middlewares/validationMiddleware";
 import {
   getEmployeeProfile,
   registerEmployee,
@@ -10,6 +10,7 @@ import {
   registerEmployeeSchema,
   loginEmployeeSchema,
 } from "../validation/employeeSchemaValidation";
+import { getAllUsers } from "../controllers/userController";
 
 const router = express.Router();
 
@@ -36,6 +37,15 @@ router.get("/all-employee",
     parseFilterParams,
   ],
   getAllEmployees
+)
+
+router.get("/all-users",
+  [
+    authenticateToken,
+    adminOrEmployeeValidation,
+    parseFilterParams,
+  ],
+  getAllUsers
 )
 
 export default router;

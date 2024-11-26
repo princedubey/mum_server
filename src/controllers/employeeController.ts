@@ -1,14 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-
-interface CustomRequest extends Request {
-  parsedFilterParams?: {
-    query?: object;
-    skip?: number;
-    limit?: number;
-    sort?: object | null;
-    projection?: object;
-  };
-}
 import bcrypt from "bcrypt";
 import employeesModel from "../models/Employee";
 import { generateToken, setTokensInCookies } from "../middlewares/authHandler";
@@ -17,6 +7,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { IEmployee } from "../models/Employee";
 import { sendEmailWithCredentials } from "../config/mailer";
 import { AppError } from "../middlewares/errorHandler";
+import { CustomRequest } from "../middlewares/validationMiddleware";
 
 // Register Employee
 export const registerEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -85,7 +76,7 @@ export const loginEmployee = async (req: Request, res: Response, next: NextFunct
     // Check password
     const isMatch = await bcrypt.compare(password, employee.password);
     if (!isMatch) {
-      throw new AppError("Email or login not matched",400)
+      throw new AppError("Email or Password not matched",400)
     }
 
     // Generate JWT tokens
@@ -143,50 +134,26 @@ export const getEmployeeProfile = async (req: Request, res: Response, next: Next
   }
 };
 
-// // Get All Employees
-// export const getAllEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-//   try {
-//     const filterParams = req.query;
-//     const limit = parseInt((filterParams.limit as string) ?? "0")
-//     const skip = parseInt((filterParams.skip as string) ?? "0")
-//     const sortParams = req.query.sort as string | undefined;
-//     const queryParms = filterParams.query as string | undefined;
-//     console.log(filterParams)
-//     const employees = await employeesModel.find({}).limit(limit).skip(skip).sort(sortParams ? JSON.parse(sortParams) : undefined);
-//     res.status(200).json({
-//       success: true,
-//       message: "All Employees fetched Successfully",
-//       data: employees,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
 export const getAllEmployees = async (
-  req: CustomRequest, // Use CustomRequest to access parsedFilterParams
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Use parsedFilterParams from middleware
     const {
       query = {},
       skip = 0,
       limit = 0,
       sort = null,
       projection = {},
-    } = req.parsedFilterParams || {}; // Fallback to defaults in case middleware is not applied
+    } = req.parsedFilterParams || {};
 
-    console.log("Filter Parameters:", req.parsedFilterParams);
-
-    // Fetch employees from the database using parsed parameters
     const employees = await employeesModel
       .find(query)
       .skip(skip)
-      .limit(limit || 0) // MongoDB interprets 0 as no limit
+      .limit(limit || 0)
       .sort(sort as string | { [key: string]: SortOrder | { $meta: any; }; } | [string, SortOrder][] | null | undefined)
-      .select(projection as string | string[] | Record<string, string | number | boolean | object>); // Apply projection if provided
+      .select(projection as string | string[] | Record<string, string | number | boolean | object>);
 
     res.status(200).json({
       success: true,

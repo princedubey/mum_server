@@ -17,30 +17,25 @@ const router = express.Router();
 router.post(
   "/signup",
   [
-    validateSchema(userRegistrationSchema), // Validates the request body against the schema
+    validateSchema(userRegistrationSchema),
   ],
   registerUser
 );
 
 // User Login
-router.post(
-  "/login",
+router.post("/login",
   [
-    validateSchema(loginUserSchema), // Validates the login schema
+    validateSchema(loginUserSchema),
   ],
   loginUser
 );
 
 // Get User Profile
-router.get(
-  "/profile/:user_id",
+router.get("/profile/:user_id",
   [
     authenticateToken, // Middleware to authenticate the user
   ],
-  (req: Request, res: Response, next: NextFunction) => {
-    // const { user_id } = req.params;
-    getUserProfile(req, res, next);
-  }
+    getUserProfile
 );
 
 export default router;
