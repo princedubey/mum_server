@@ -14,7 +14,7 @@ export const userRegistrationSchema = z.object({
   complexion: z.string().min(3, "Complexion must be at least 3 characters").max(30, "Complexion must be at most 30 characters"),
   hobbies: z.array(z.string()).min(1, "At least one hobby must be provided"),
   aboutMe: z.string().min(10, "About me must be at least 10 characters").max(500, "About me must be at most 500 characters"),
-  profileImages: z.array(z.string()).min(1, "At least one profile image URL must be provided"),
+  profileImages: z.array(z.string()).optional(),
 
   // Contact Information
   phoneNumber: z.string().min(10, "Phone number must be at least 10 characters").max(15, "Phone number must be at most 15 characters"),
@@ -64,9 +64,14 @@ export const userRegistrationSchema = z.object({
     fatherOccupation: z.string().min(3, "Father's occupation must be at least 3 characters"),
     motherName: z.string().min(3, "Mother's name must be at least 3 characters"),
     motherOccupation: z.string().min(3, "Mother's occupation must be at least 3 characters"),
-    noOfSiblings: z.number().min(0, "Number of siblings must be a positive number"),
-    noOfBrothers: z.number().min(0, "Number of brothers must be a positive number"),
-    noOfSisters: z.number().min(0, "Number of sisters must be a positive number"),
+    siblings: z.array(z.object({
+      name: z.string().min(3, "Sibling's name must be at least 3 characters"),
+      relation: z.string().min(3, "Relation must be at least 3 characters"),
+      age: z.number().min(0, "Age must be a positive number"),
+      ageRelation: z.string().min(3, "Age relation must be at least 3 characters"),
+      education: z.string().min(3, "Education must be at least 3 characters"),
+      workDetails: z.string().min(3, "Work details must be at least 3 characters"),
+    })),
     familyType: z.string().min(3, "Family type must be at least 3 characters"),
   }),
 

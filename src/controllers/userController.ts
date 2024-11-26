@@ -6,9 +6,11 @@ import { AppError } from "../middlewares/errorHandler";
 import { JwtPayload } from "jsonwebtoken";
 import { CustomRequest } from "../middlewares/validationMiddleware";
 import { SortOrder } from "mongoose";
+import { s3StorageService } from '../services/s3-storage-service'
 
 // Register User
 export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
   const {
     firstName, middleName, lastName, gender, dob, bloodGroup, height, weight,
     complexion, hobbies, aboutMe, profileImages,
@@ -18,6 +20,9 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     noOfSiblings, noOfBrothers, noOfSisters, familyType, spouseExpctation,
     residentialAddr, permanentAddr, createdBy, tags, password
   } = req.body;
+
+ res.json({message:`${req.headers} + $`});
+ return
 
   try {
     // Check if user already exists
@@ -164,6 +169,29 @@ export const deleteUserByAdmin = async (req: Request, res: Response, next: NextF
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+export const generatePUTPresignedUrl = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const imageNames = req.query.imageNames as string;
+    if (!imageNames) {
+      res.status(400).json({
+        success: false,
+        message: "imageNames query parameter is required",
+      });
+      return;
+    }
+    const fileNames = imageNames.split(',');
+    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(fileNames);
+    res.status(200).json({
+      success: true,
+      message: "Presigned URLs generated successfully",
+      data: signedUrls,
     });
   } catch (error) {
     next(error);

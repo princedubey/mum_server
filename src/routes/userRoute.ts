@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import { authenticateToken } from "../middlewares/authHandler";
 import { validateSchema } from "../middlewares/validationMiddleware";
 import {
+  generatePUTPresignedUrl,
   getUserProfile,
   loginUser,
   registerUser,
@@ -15,9 +16,9 @@ const router = express.Router();
 
 // User Registration
 router.post(
-  "/signup",
+  "/register",
   [
-    validateSchema(userRegistrationSchema),
+    // validateSchema(userRegistrationSchema),
   ],
   registerUser
 );
@@ -37,5 +38,9 @@ router.get("/profile/:user_id",
   ],
     getUserProfile
 );
+
+// get put presigned url 
+router.get('/presignedUrl',authenticateToken,generatePUTPresignedUrl
+)
 
 export default router;

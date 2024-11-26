@@ -61,6 +61,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
+      console.log(token)
       res.status(403).json({
         success: false,
         message: "Access denied. Invalid or expired token.",

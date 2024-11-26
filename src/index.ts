@@ -6,12 +6,16 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import errorHandler from "./middlewares/errorHandler";
 import router from "./routes/index";
+
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
 
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "100mb" }));
+app.use(cookieParser());
 // Apply CORS middleware to allow cross-origin requests
 app.use(
   cors({
@@ -29,8 +33,9 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
   })
 );
-app.use(cookieParser());
-app.use(express.json({ limit: "50mb" }));
+
+
+
 
 app.use(morgan("dev"));
 
