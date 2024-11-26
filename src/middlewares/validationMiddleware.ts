@@ -44,6 +44,7 @@ export const parseFilterParams = async (
       order_type = "asc",
       order_by,
       projection,
+      search,
     } = req.query;
 
     const isGetAll = get_all === "true";
@@ -58,13 +59,23 @@ export const parseFilterParams = async (
     // Parse projection fields into an object
     const parsedProjection = typeof projection === "string"
       ? projection.split(",").reduce((acc, field) => {
-          acc[field.trim()] = 1; // Include field in projection
+          acc[field.trim()] = 1;
           return acc;
         }, {} as Record<string, number>)
       : {};
 
+    const searchQuery = search
+      ? {
+          $or: [
+            { firstName: { $regex: search, $options: "i" } },
+            { lastName: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
     req.parsedFilterParams = {
-      query: {},
+      query: { ...searchQuery },
       skip: parsedSkip,
       limit: parsedLimit,
       sort,
