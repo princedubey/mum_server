@@ -224,3 +224,20 @@ export const getAllUsers = async (
     next(error);
   }
 };
+
+export const downloadFiles = async (req: Request, res: Response): Promise<void> => {
+  const fileName = req.query.fileName as string;
+
+  if (!fileName) {
+    res.status(400).json({ error: "Missing fileName" });
+    return
+  }
+
+  try {
+    const downloadUrl = await s3StorageService.generateDownloadUrl(fileName);
+    res.status(200).json({ downloadUrl });
+  } catch (error) {
+    console.error("Error generating download URL:", error);
+    res.status(500).json({ error: "Failed to generate download URL" });
+  }
+}

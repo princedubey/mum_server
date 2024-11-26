@@ -62,6 +62,14 @@ export class S3StorageService {
         return signedUrl;
     }
 
+    public async generateDownloadUrl(fileName: string): Promise<string> {
+        const command = new GetObjectCommand({
+          Bucket: 'test-ygsd-vikash',
+          Key: fileName,
+        });
+    
+        return await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
+      }
    
 }
 
