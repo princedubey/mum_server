@@ -3,7 +3,7 @@ import { authenticateToken } from "../middlewares/authHandler";
 import { adminOrEmployeeValidation, adminValidation, parseFilterParams, validateSchema } from "../middlewares/validationMiddleware";
 import {
   getEmployeeProfile,
-  registerEmployee,
+  registerOrUpdateEmployee,
   getAllEmployees,
 } from "../controllers/employeeController";
 import {
@@ -19,7 +19,7 @@ router.post("/register",
   [
     validateSchema(registerEmployeeSchema), // Validates the request body against the schema
   ],
-  registerEmployee
+  registerOrUpdateEmployee
 );
 
 // Get Employee Profile

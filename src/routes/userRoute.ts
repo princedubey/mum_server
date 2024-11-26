@@ -5,7 +5,7 @@ import {
   generatePUTPresignedUrl,
   getUserProfile,
   loginUser,
-  registerUser,
+  registerOrUpdateUser,
 } from "../controllers/userController";
 import {
   userRegistrationSchema,
@@ -20,7 +20,7 @@ router.post(
   [
     // validateSchema(userRegistrationSchema),
   ],
-  registerUser
+  registerOrUpdateUser
 );
 
 // User Login

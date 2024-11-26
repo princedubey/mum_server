@@ -8,9 +8,12 @@ import { CustomRequest } from "../middlewares/validationMiddleware";
 import { SortOrder } from "mongoose";
 import { s3StorageService } from '../services/s3-storage-service'
 
-// Register User
-export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-
+// Register or Update User
+export const registerOrUpdateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const {
     firstName, middleName, lastName, gender, dob, bloodGroup, height, weight,
     complexion, hobbies, aboutMe, profileImages,

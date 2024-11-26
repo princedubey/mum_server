@@ -9,49 +9,88 @@ import { sendEmailWithCredentials } from "../config/mailer";
 import { AppError } from "../middlewares/errorHandler";
 import { CustomRequest } from "../middlewares/validationMiddleware";
 
-// Register Employee
-export const registerEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { firstName, lastName, email, phoneNumber, post, designation, postingPlace, role, access, password,employeeId,companyName}: IEmployee = req.body;
+// Register or Update Employee
+export const registerOrUpdateEmployee = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const {
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    post,
+    designation,
+    postingPlace,
+    role,
+    access,
+    password,
+    employeeId,
+    companyName,
+  }: IEmployee = req.body;
 
   try {
-    console.log("Register employee")
-    // Check if employee already exists
+    console.log("Register or Update Employee");
+
     const employeeExists = await employeesModel.findOne({ email });
+
     if (employeeExists) {
-      res.status(400).json({
-        success: false,
-        message: "Employee already exists",
+      employeeExists.firstName = firstName;
+      employeeExists.lastName = lastName;
+      employeeExists.phoneNumber = phoneNumber;
+      employeeExists.post = post;
+      employeeExists.designation = designation;
+      employeeExists.postingPlace = postingPlace;
+      employeeExists.role = role;
+      employeeExists.access = access;
+      employeeExists.employeeId = employeeId;
+      employeeExists.companyName = companyName;
+
+      // Update password only if a new one is provided
+      if (password) {
+        employeeExists.password = await bcrypt.hash(password, 10);
+      }
+
+      await employeeExists.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Employee data updated successfully",
+        employee: employeeExists,
+      });
+    } else {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create the new employee
+      const newEmployee = new employeesModel({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        post,
+        designation,
+        postingPlace,
+        role,
+        access,
+        password: hashedPassword,
+        isActive: true,
+        employeeId,
+        companyName,
+      });
+
+      await newEmployee.save();
+
+      // Send email with credentials
+      await sendEmailWithCredentials(email, email, password);
+
+      res.status(201).json({
+        success: true,
+        message: "Employee created successfully",
+        employee: newEmployee,
       });
     }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create the new employee
-    const newEmployee = new employeesModel({
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      post,
-      designation,
-      postingPlace,
-      role,
-      access,
-      password: hashedPassword,
-      isActive: true,
-      employeeId,
-      companyName,
-    });
-    await newEmployee.save();
-
-    // Send email with password
-    await sendEmailWithCredentials(email, email, password)
-
-    res.status(201).json({
-      success: true,
-      employee: newEmployee,
-    });
   } catch (error) {
     next(error);
   }
