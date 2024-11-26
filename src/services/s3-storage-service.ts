@@ -33,19 +33,20 @@ export class S3StorageService {
         return S3StorageService.instance;
     }
 
-    public async generatePUTPresignedUrl(key:string): Promise<string> {
-        const command = new PutObjectCommand({
-            Bucket: 'test-ygsd-vikash',
-            Key: key, // Key will be filename
-        })
+    public async generatePUTPresignedUrl(key: any): Promise<string> {
 
-        const signedUrl = await getSignedUrl(this.s3Client, command, {
-            expiresIn: 60 * 5, // expires in 5 minutes
-        });
-        return signedUrl;
+          const command = new PutObjectCommand({
+            Bucket: 'test-ygsd-vikash',
+            Key: key.fileName,
+            ContentType: key.fileType,
+          });
+
+          const url = await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
+
+        return url;
      }
 
-     public async generateMultiplePUTPresignedUrls(keys: string[]): Promise<string[]> {
+    public async generateMultiplePUTPresignedUrls(keys: string[]): Promise<string[]> {
         const promises = keys.map(key => this.generatePUTPresignedUrl(key));
         const signedUrls = await Promise.all(promises);
         return signedUrls;

@@ -178,16 +178,9 @@ export const deleteUserByAdmin = async (req: Request, res: Response, next: NextF
 
 export const generatePUTPresignedUrl = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const imageNames = req.query.imageNames as string;
-    if (!imageNames) {
-      res.status(400).json({
-        success: false,
-        message: "imageNames query parameter is required",
-      });
-      return;
-    }
-    const fileNames = imageNames.split(',');
-    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(fileNames);
+    const imagesData = req.body;
+  
+    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(imagesData);
     res.status(200).json({
       success: true,
       message: "Presigned URLs generated successfully",

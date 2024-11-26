@@ -40,7 +40,8 @@ router.get("/profile/:user_id",
 );
 
 // get put presigned url 
-router.get('/presignedUrl',authenticateToken,generatePUTPresignedUrl
+router.post("/presignedUrl",authenticateToken,
+  generatePUTPresignedUrl
 )
 
 export default router;
