@@ -5,6 +5,7 @@ import {
   getEmployeeProfile,
   registerOrUpdateEmployee,
   getAllEmployees,
+  getDashboardInsight,
 } from "../controllers/employeeController";
 import {
   registerEmployeeSchema,
@@ -46,6 +47,15 @@ router.get("/all-users",
     parseFilterParams,
   ],
   getAllUsers
+)
+
+router.get("/dashboard-insights",
+  [
+    authenticateToken,
+    adminOrEmployeeValidation,
+    parseFilterParams,
+  ],
+  getDashboardInsight
 )
 
 export default router;

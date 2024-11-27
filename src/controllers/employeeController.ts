@@ -8,6 +8,7 @@ import { IEmployee } from "../models/Employee";
 import { sendEmailWithCredentials } from "../config/mailer";
 import { AppError } from "../middlewares/errorHandler";
 import { CustomRequest } from "../middlewares/validationMiddleware";
+import UserModel from "../models/User";
 
 // Register or Update Employee
 export const registerOrUpdateEmployee = async (
@@ -270,6 +271,137 @@ export const deleteEmployee = async (req: Request, res: Response, next: NextFunc
     res.status(200).json({
       success: true,
       message: "Employee deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDashboardInsight = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    const aggregatedData = await UserModel.aggregate([
+      {
+        $facet: {
+          // User stats: total, inactive, and male-female ratio
+          userStats: [
+            {
+              $group: {
+                _id: null,
+                totalUsers: { $sum: 1 },
+                inactiveUsers: { $sum: { $cond: [{ $eq: ['$isApproved', false] }, 1, 0] } },
+                maleUsers: { $sum: { $cond: [{ $eq: ['$gender', 'male'] }, 1, 0] } },
+                femaleUsers: { $sum: { $cond: [{ $eq: ['$gender', 'female'] }, 1, 0] } },
+              },
+            },
+            {
+              $addFields: {
+                maleFemaleRatio: {
+                  $cond: [
+                    { $eq: [{ $add: ['$maleUsers', '$femaleUsers'] }, 0] }, 
+                    '0% : 0%',
+                    {
+                      $concat: [
+                        { $toString: { $multiply: [{ $divide: ['$maleUsers', { $add: ['$maleUsers', '$femaleUsers'] }] }, 100] } },
+                        '% : ',
+                        { $toString: { $multiply: [{ $divide: ['$femaleUsers', { $add: ['$maleUsers', '$femaleUsers'] }] }, 100] } },
+                        '%',
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalUsers: 1,
+                inactiveUsers: 1,
+                maleFemaleRatio: 1,
+              },
+            },
+          ],
+
+          // Last 6 months data: age distribution, new registrations, and top locations
+          lastSixMonthsData: [
+            {
+              $match: {
+                createdAt: { $gte: sixMonthsAgo },
+              },
+            },
+            {
+              $project: {
+                month: { $month: '$createdAt' },
+                year: { $year: '$createdAt' },
+                gender: 1,
+                age: 1,
+                location: 1,
+              },
+            },
+            {
+              $group: {
+                _id: { year: '$year', month: '$month', gender: '$gender' },
+                count: { $sum: 1 },
+                ages: { $push: '$age' },
+                locations: { $push: '$location' },
+              },
+            },
+            {
+              $sort: { '_id.year': 1, '_id.month': 1 },
+            },
+            {
+              $group: {
+                _id: { year: '$_id.year', month: '$_id.month' },
+                genderCounts: {
+                  $push: {
+                    gender: '$_id.gender',
+                    count: '$count',
+                    ages: '$ages',
+                  },
+                },
+                locations: { $push: '$locations' },
+              },
+            },
+            {
+              $project: {
+                monthYear: { $concat: [{ $toString: '$_id.month' }, '-', { $toString: '$_id.year' }] },
+                genderCounts: 1,
+                topLocations: {
+                  $arrayElemAt: [
+                    {
+                      $map: {
+                        input: '$locations',
+                        as: 'loc',
+                        in: { location: '$$loc', count: { $size: '$$loc' } },
+                      },
+                    },
+                    6,
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const userStats = aggregatedData[0]?.userStats?.[0] || {};
+    const lastSixMonthsData = aggregatedData[0]?.lastSixMonthsData || [];
+
+    const totalEmployees = await employeesModel.countDocuments({ role: { $ne: 'admin' } });
+
+    res.status(200).json({
+      success: true,
+      message: 'Total Employee and User Counts fetched successfully',
+      data: {
+        TOTAL_EMPLOYEE: totalEmployees,
+        TOTAL_USERS: userStats.totalUsers || 0,
+        INACTIVE_USERS: userStats.inactiveUsers || 0,
+        MALE_FEMALE_USERS_RATIO: userStats.maleFemaleRatio || '0% : 0%',
+        LAST_SIX_MONTHS_DATA: lastSixMonthsData,
+      },
     });
   } catch (error) {
     next(error);
