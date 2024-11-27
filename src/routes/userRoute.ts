@@ -20,7 +20,7 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    // validateSchema(userRegistrationSchema),
+    validateSchema(userRegistrationSchema),
   ],
   registerOrUpdateUser
 );

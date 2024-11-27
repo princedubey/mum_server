@@ -1,92 +1,110 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-// Schema for user registration
-export const userRegistrationSchema = z.object({
-  // Personal Information
-  firstName: z.string().min(3, "First name must be at least 3 characters").max(30, "First name must be at most 30 characters"),
-  middleName: z.string().min(3, "Middle name must be at least 3 characters").max(30, "Middle name must be at most 30 characters"),
-  lastName: z.string().min(3, "Last name must be at least 3 characters").max(30, "Last name must be at most 30 characters"),
-  gender: z.string().min(3, "Gender must be at least 3 characters").max(10, "Gender must be at most 10 characters"),
-  dob: z.string().min(10, "Date of birth must be in the format YYYY-MM-DD").max(10, "Date of birth must be in the format YYYY-MM-DD"),
-  bloodGroup: z.string().min(2, "Blood group must be at least 2 characters").max(5, "Blood group must be at most 5 characters"),
-  height: z.number().min(0, "Height must be a positive number"),
-  weight: z.number().min(0, "Weight must be a positive number"),
-  complexion: z.string().min(3, "Complexion must be at least 3 characters").max(30, "Complexion must be at most 30 characters"),
-  hobbies: z.array(z.string()).min(1, "At least one hobby must be provided"),
-  aboutMe: z.string().min(10, "About me must be at least 10 characters").max(500, "About me must be at most 500 characters"),
+// Personal Information Schema
+export const personalInfoSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  middleName: z.string().optional(),
+  lastName: z.string().min(1, "Last name is required"),
+  gender: z.enum(["male", "female", "other"]).refine((val) => ["male", "female", "other"].includes(val), {
+    message: "Invalid gender",
+  }),
+  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  bloodGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
+  height: z.number().positive("Height must be a positive number"),
+  weight: z.number().positive("Weight must be a positive number"),
+  complexion: z.string().min(1, "Complexion is required"),
+  hobbies: z.array(z.string()).optional(),
+  aboutMe: z.string().optional(),
   profileImages: z.array(z.string()).optional(),
-
-  // Contact Information
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 characters").max(15, "Phone number must be at most 15 characters"),
-  email: z.string().email("Invalid email address"),
-
-  // Address Information
-  residentialAddr: z.object({
-    address: z.string().min(5, "Address must be at least 5 characters"),
-    locality: z.string().min(3, "Locality must be at least 3 characters"),
-    city: z.string().min(3, "City must be at least 3 characters"),
-    district: z.string().min(3, "District must be at least 3 characters"),
-    state: z.string().min(3, "State must be at least 3 characters"),
-    pincode: z.string().min(6, "Pincode must be 6 digits").max(6, "Pincode must be 6 digits"),
-  }),
-
-  permanentAddr: z.object({
-    address: z.string().min(5, "Address must be at least 5 characters"),
-    locality: z.string().min(3, "Locality must be at least 3 characters"),
-    city: z.string().min(3, "City must be at least 3 characters"),
-    district: z.string().min(3, "District must be at least 3 characters"),
-    state: z.string().min(3, "State must be at least 3 characters"),
-    pincode: z.string().min(6, "Pincode must be 6 digits").max(6, "Pincode must be 6 digits"),
-  }),
-
-  // Educational and Professional Information
-  eduAndProfInfo: z.object({
-    highestEducation: z.string().min(3, "Highest education must be at least 3 characters"),
-    otherEductionDetail: z.string().min(3, "Other education details must be at least 3 characters"),
-    jobType: z.string().min(3, "Job type must be at least 3 characters"),
-    designation: z.string().min(3, "Designation must be at least 3 characters"),
-    workDetail: z.string().min(3, "Work details must be at least 3 characters"),
-    income: z.number().min(0, "Income must be a positive number"),
-  }),
-
-  // Culture and Religious Information
-  cultureAndReligiousInfo: z.object({
-    religion: z.string().min(3, "Religion must be at least 3 characters"),
-    caste: z.string().min(3, "Caste must be at least 3 characters"),
-    subCaste: z.string().min(3, "Sub-caste must be at least 3 characters"),
-    gotra: z.string().min(3, "Gotra must be at least 3 characters"),
-    raasi: z.string().min(3, "Raasi must be at least 3 characters"),
-  }),
-
-  // Family Information
-  familyInfo: z.object({
-    fatherName: z.string().min(3, "Father's name must be at least 3 characters"),
-    fatherOccupation: z.string().min(3, "Father's occupation must be at least 3 characters"),
-    motherName: z.string().min(3, "Mother's name must be at least 3 characters"),
-    motherOccupation: z.string().min(3, "Mother's occupation must be at least 3 characters"),
-    siblings: z.array(z.object({
-      name: z.string().min(3, "Sibling's name must be at least 3 characters"),
-      relation: z.string().min(3, "Relation must be at least 3 characters"),
-      age: z.number().min(0, "Age must be a positive number"),
-      ageRelation: z.string().min(3, "Age relation must be at least 3 characters"),
-      education: z.string().min(3, "Education must be at least 3 characters"),
-      workDetails: z.string().min(3, "Work details must be at least 3 characters"),
-    })),
-    familyType: z.string().min(3, "Family type must be at least 3 characters"),
-  }),
-
-  spouseExpctation: z.string().min(10, "Spouse expectation must be at least 10 characters"),
-
-  // Additional Fields
-  isApproved: z.boolean().optional(),
-  tags: z.array(z.string()).min(1, "At least one tag must be provided"),
 });
+
+// Contact Information Schema
+export const contactInfoSchema = z.object({
+  phoneNumber: z.string().regex(/^\d{10}$/, "Phone number must be 10 digits"),
+  email: z.string().email("Invalid email address"),
+});
+
+// Address Schema
+export const addressSchema = z.object({
+  address: z.string().min(1, "Address is required"),
+  locality: z.string().min(1, "Locality is required"),
+  city: z.string().min(1, "City is required"),
+  district: z.string().min(1, "District is required"),
+  state: z.string().min(1, "State is required"),
+  pincode: z.string().regex(/^\d{6}$/, "Pincode must be 6 digits"),
+});
+
+// Educational and Professional Information Schema
+export const eduAndProfInfoSchema = z.object({
+  highestEducation: z.string().min(1, "Highest education is required"),
+  otherEductionDetail: z.string().optional(),
+  jobType: z.string().min(1, "Job type is required"),
+  designation: z.string().optional(),
+  workDetail: z.string().optional(),
+  income: z.number().nonnegative("Income must be a non-negative number"),
+});
+
+// Culture and Religious Information Schema
+export const cultureAndReligiousInfoSchema = z.object({
+  religion: z.string().min(1, "Religion is required"),
+  caste: z.string().min(1, "Caste is required"),
+  subCaste: z.string().optional(),
+  gotra: z.string().optional(),
+  raasi: z.string().optional(),
+});
+
+
+export const siblingSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  relation: z.string().min(1, "Relation is required"),
+  age: z.number().nonnegative("Age must be a non-negative number"),
+  ageRelation: z.string().min(1, "Age relation is required"),
+  education: z.string().min(1, "Education is required"),
+  workDetails: z.string().optional(),
+});
+
+// Zod schema for IFamilyInfo
+export const familyInfoSchema = z.object({
+  fatherName: z.string().min(1, "Father's name is required"),
+  fatherOccupation: z.string().min(1, "Father's occupation is required"),
+  motherName: z.string().min(1, "Mother's name is required"),
+  motherOccupation: z.string().min(1, "Mother's occupation is required"),
+  siblings: z.array(siblingSchema).min(1, "At least one sibling is required"),
+  familyType: z.string().min(1, "Family type is required"),
+});
+
+
+// User Schema
+export const userRegistrationSchema = z.object({
+  createdBy: z.string().min(1, "Created by is required"),
+
+  personalInfo: personalInfoSchema,
+
+  contactInfo: contactInfoSchema,
+
+  residentialAddr: addressSchema,
+  permanentAddr: addressSchema,
+
+  eduAndProfInfo: eduAndProfInfoSchema,
+
+  cultureAndReligiousInfo: cultureAndReligiousInfoSchema,
+
+  familyInfo: familyInfoSchema,
+
+  spouseExpctation: z.string().optional(),
+
+  isApproved: z.boolean(),
+  password: z.string().min(6,"Password must have at least 6 characters").optional(),
+
+  tags: z.array(z.string()).optional(),
+});
+
 
 // Schema for employee login
 export const loginUserSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  accessType: z.string()
+  accessType: z.string(),
 });
 
 // Example of types inferred from the schema
