@@ -47,14 +47,22 @@ interface ICultureAndReligiousInfo {
   raasi: string;
 }
 
-interface IFamilyInfo {
+export interface ISibling{
+  name: string;
+  relation: string;
+  age: number;
+  ageRelation: string;
+  education: string;
+  workDetails?: string;
+};
+
+
+export interface IFamilyInfo {
   fatherName: string;
   fatherOccupation: string;
   motherName: string;
   motherOccupation: string;
-  noOfSiblings: number;
-  noOfBrothers: number;
-  noOfSisters: number;
+  siblings: ISibling[];
   familyType: string;
 }
 
@@ -83,6 +91,7 @@ export interface IUser {
   isApproved: boolean;
 
   tags: [string];
+  password:string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -90,7 +99,7 @@ const userSchema = new Schema<IUser>(
     createdBy: { type: Schema.Types.ObjectId, required: true },
 
     personalInfo: {
-      firstname: { type: String, required: true },
+      firstName: { type: String, required: true },
       middleName: { type: String },
       lastName: { type: String, required: true },
       gender: { type: String, required: true },
@@ -144,14 +153,22 @@ const userSchema = new Schema<IUser>(
       fatherOccupation: { type: String },
       motherName: { type: String },
       motherOccupation: { type: String },
-      noOfSiblings: { type: Number },
-      noOfBrothers: { type: Number },
-      noOfSisters: { type: Number },
+      siblings: [
+        {
+          name: { type: String },
+          relation: { type: String },
+          age: { type: Number },
+          ageRelation: { type: String },
+          education: { type: String },
+          workDetails: { type: String },
+        },
+      ],
       familyType: { type: String },
     },
     spouseExpctation: { type: String },
     isApproved: { type: Boolean, default: false },
     tags: [{ type: String }],
+    password:{type:String,required:true}
   },
   { timestamps: true }
 );

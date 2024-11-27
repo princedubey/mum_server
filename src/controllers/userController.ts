@@ -14,22 +14,13 @@ export const registerOrUpdateUser = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const {
-    firstName, middleName, lastName, gender, dob, bloodGroup, height, weight,
-    complexion, hobbies, aboutMe, profileImages,
-    phoneNumber, email, highestEducation, otherEductionDetail, jobType,
-    designation, workDetail, income, religion, caste, subCaste, gotra,
-    raasi, fatherName, fatherOccupation, motherName, motherOccupation,
-    noOfSiblings, noOfBrothers, noOfSisters, familyType, spouseExpctation,
-    residentialAddr, permanentAddr, createdBy, tags, password
-  } = req.body;
-
- res.json({message:`${req.headers} + $`});
- return
+  const userData:IUser = req.body;
 
   try {
+    console.log("========================================================")
+    console.log('register',userData)
     // Check if user already exists
-    const userExists = await UserModel.findOne({ "contactInfo.email": email });
+    const userExists = await UserModel.findOne({ "contactInfo.email": userData.contactInfo.email });
     if (userExists) {
       res.status(400).json({
         success: false,
@@ -38,21 +29,12 @@ export const registerOrUpdateUser = async (
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    userData.password = hashedPassword
 
     // Create the new user
-    const newUser = new UserModel({
-      createdBy,
-      personalInfo: { firstName, middleName, lastName, gender, dob, bloodGroup, height, weight, complexion, hobbies, aboutMe, profileImages },
-      contactInfo: { phoneNumber, email, password: hashedPassword },
-      residentialAddr,
-      permanentAddr,
-      eduAndProfInfo: { highestEducation, otherEductionDetail, jobType, designation, workDetail, income },
-      cultureAndReligiousInfo: { religion, caste, subCaste, gotra, raasi },
-      familyInfo: { fatherName, fatherOccupation, motherName, motherOccupation, noOfSiblings, noOfBrothers, noOfSisters, familyType },
-      spouseExpctation,
-      tags,
-    });
+    const newUser = new UserModel(userData);
 
     await newUser.save();
 
@@ -183,7 +165,7 @@ export const generatePUTPresignedUrl = async (req: Request, res: Response, next:
   try {
     const imagesData = req.body;
   
-    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(imagesData);
+    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(imagesData.payLoads);
     res.status(200).json({
       success: true,
       message: "Presigned URLs generated successfully",
@@ -234,7 +216,7 @@ export const downloadFiles = async (req: Request, res: Response): Promise<void> 
   }
 
   try {
-    const downloadUrl = await s3StorageService.generateDownloadUrl(fileName);
+    const downloadUrl = await s3StorageService.getDownloadUrl(fileName);
     res.status(200).json({ downloadUrl });
   } catch (error) {
     console.error("Error generating download URL:", error);

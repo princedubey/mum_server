@@ -19,7 +19,7 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    // validateSchema(userRegistrationSchema),
+    validateSchema(userRegistrationSchema),
   ],
   registerOrUpdateUser
 );
@@ -41,7 +41,7 @@ router.get("/profile/:user_id",
 );
 
 // generation put presigned url 
-router.post("/presigned-url",authenticateToken,
+router.post("/presignedUrl",authenticateToken,
   generatePUTPresignedUrl
 )
 
