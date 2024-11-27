@@ -241,3 +241,21 @@ export const downloadFiles = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Failed to generate download URL" });
   }
 }
+
+// delete file from s3
+export const deleteFile = async (req: Request, res: Response): Promise<void> => {
+  const fileName = req.query.fileName as string;
+
+  if (!fileName) {
+    res.status(400).json({ error: "Missing fileName" });
+    return;
+  }
+
+  try {
+    await s3StorageService.deleteImage(fileName);
+    res.status(200).json({ success: true, message: "File deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    res.status(500).json({ error: "Failed to delete file" });
+  }
+}

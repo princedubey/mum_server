@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import { authenticateToken } from "../middlewares/authHandler";
 import { validateSchema } from "../middlewares/validationMiddleware";
 import {
+  deleteFile,
   downloadFiles,
   generatePUTPresignedUrl,
   getUserProfile,
@@ -41,13 +42,27 @@ router.get("/profile/:user_id",
 );
 
 // generation put presigned url 
-router.post("/presigned-url",authenticateToken,
+router.post("/presigned-url",
+  [
+    authenticateToken,
+  ],
   generatePUTPresignedUrl
 )
 
 // get images from s3
-router.get("/download-url",authenticateToken,
+router.get("/download-file",
+  [
+    authenticateToken,
+  ],
   downloadFiles
+)
+
+// delete images from s3
+router.delete("/delete-file", 
+  [
+    authenticateToken,
+  ],
+  deleteFile
 )
 
 export default router;

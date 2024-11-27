@@ -1,4 +1,4 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { PutObjectCommand,GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -70,7 +70,17 @@ export class S3StorageService {
     
         return await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
       }
-   
+
+    // delete image from storage
+    public async deleteImage(fileName: string): Promise<void> {
+        const command = new DeleteObjectCommand({
+            Bucket: 'test-ygsd-vikash',
+            Key: fileName,
+        });
+        await this.s3Client.send(command);
+
+        console.log("Image deleted successfully");
+    }
 }
 
 
