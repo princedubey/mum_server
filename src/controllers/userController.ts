@@ -117,12 +117,8 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
 export const getUserByEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const email: string = req.params.email;
-     let user = await UserModel.findOne({ "contactInfo.email": email }).select("-password");
-    
-      user.personalInfo.profileImages = ["xya"]
+    let user = await UserModel.findOne({ "contactInfo.email": email }).select("-password");
 
-      console.log("User ",user)
-    
     if (!user) {
       res.status(404).json({
         success: false,
@@ -130,7 +126,14 @@ export const getUserByEmail = async (req: Request, res: Response, next: NextFunc
       });
       return;
     }
-    // console.log("User details based on email " , user.personalInfo.profileImages);
+
+    const images: string[] = user.personalInfo.profileImages || [];
+    const urls = await Promise.all(
+      images.map((image) => s3StorageService.getDownloadUrl(image))
+    );
+
+    user.personalInfo.profileImages = urls;
+
     res.status(200).json({
       success: true,
       message: "User fetched successfully",
@@ -193,7 +196,7 @@ export const generatePUTPresignedUrl = async (req: Request, res: Response, next:
   try {
     const imagesData = req.body;
   
-    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(imagesData.payLoads);
+    const signedUrls =  await s3StorageService.generateMultiplePUTPresignedUrls(imagesData);
     res.status(200).json({
       success: true,
       message: "Presigned URLs generated successfully",
