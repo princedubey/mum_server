@@ -114,6 +114,33 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+export const getUserByEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const email: string = req.params.email;
+     let user = await UserModel.findOne({ "contactInfo.email": email }).select("-password");
+    
+      user.personalInfo.profileImages = ["xya"]
+
+      console.log("User ",user)
+    
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+    // console.log("User details based on email " , user.personalInfo.profileImages);
+    res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // update user by id from admin
 export const updateUserByAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -131,6 +158,7 @@ export const updateUserByAdmin = async (req: Request, res: Response, next: NextF
       success: true,
       message: "User updated successfully",
       data: user,
+     
     });
   } catch (error) {
     next(error);

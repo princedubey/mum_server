@@ -9,6 +9,8 @@ export const personalInfoSchema = z.object({
     message: "Invalid gender",
   }),
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  age: z.number().min(1, "Age must be a positive number"),
+  // Blood Group options: A+, A-, B+, B-, AB+, AB-, O+, O-
   bloodGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
   height: z.number().positive("Height must be a positive number"),
   weight: z.number().positive("Weight must be a positive number"),

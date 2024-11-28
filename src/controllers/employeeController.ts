@@ -243,7 +243,7 @@ export const updateEmployeeById = async (req: Request, res: Response, next: Next
       });
       return;
     }
-
+ 
     res.status(200).json({
       success: true,
       message: "Employee updated successfully",

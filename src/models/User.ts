@@ -7,6 +7,7 @@ interface IPersonalInfo {
   lastName: string;
   gender: string;
   dob: string;
+  age:number;
   bloodGroup: string;
   height: number;
   weight: number;
@@ -104,13 +105,16 @@ const userSchema = new Schema<IUser>(
       lastName: { type: String, required: true },
       gender: { type: String, required: true },
       dob: { type: Date, required: true },
+      age:{type:Number, required: true},
       bloodGroup: { type: String },
       height: { type: Number },
       weight: { type: Number },
       complexion: { type: String },
       hobbies: [{ type: String }],
       aboutMe: { type: String },
-      profileImages: [{ type: String }],
+      profileImages: [
+        { type: String }
+      ],
     },
 
     contactInfo: {

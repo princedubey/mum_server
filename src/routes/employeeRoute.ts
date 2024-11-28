@@ -11,7 +11,7 @@ import {
   registerEmployeeSchema,
   loginEmployeeSchema,
 } from "../validation/employeeSchemaValidation";
-import { getAllUsers } from "../controllers/userController";
+import { getAllUsers, getUserByEmail } from "../controllers/userController";
 
 const router = express.Router();
 
@@ -30,6 +30,15 @@ router.get("/profile/:id",
   ],
   getEmployeeProfile
 );
+
+// get user by email for admin or employee side
+router.get("/user/:email",
+  [
+    authenticateToken,
+    adminOrEmployeeValidation,
+  ],
+  getUserByEmail
+)
 
 router.get("/all-employee",
   [
