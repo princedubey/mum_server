@@ -4,6 +4,7 @@ import { validateSchema } from "../middlewares/validationMiddleware";
 import {
   deleteFile,
   downloadFiles,
+  findMatchingUser,
   generatePUTPresignedUrl,
   getUserProfile,
   loginUser,
@@ -63,6 +64,15 @@ router.delete("/delete-file",
     authenticateToken,
   ],
   deleteFile
+)
+
+// get find connections
+
+router.get("/find-connections",
+  [
+    authenticateToken,
+  ],
+  findMatchingUser
 )
 
 export default router;
