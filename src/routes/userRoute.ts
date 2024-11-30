@@ -14,6 +14,7 @@ import {
   userRegistrationSchema,
   loginUserSchema,
 } from "../validation/userSchemaValidation";
+import { acceptConnectionRequest, getAllProposals, getAllSentProposals, getConnections, rejectConnectionRequest, sendConnectionRequest } from "../controllers/connectionController";
 
 const router = express.Router();
 
@@ -66,13 +67,53 @@ router.delete("/delete-file",
   deleteFile
 )
 
-// get find connections
-
-router.get("/find-connections",
+router.get("/find-new-connections",
   [
     authenticateToken,
   ],
   findMatchingUser
+)
+
+router.get("/connections",
+  [
+    authenticateToken,
+  ],
+  getConnections
+)
+
+router.patch("/send-proposal/:targetUserId",
+  [
+    authenticateToken,
+  ],
+  sendConnectionRequest
+)
+
+router.patch("/accept-proposal/:targetUserId",
+  [
+    authenticateToken,
+  ],
+  acceptConnectionRequest
+)
+
+router.patch("/reject-proposal/:targetUserId",
+  [
+    authenticateToken,
+  ],
+  rejectConnectionRequest
+)
+
+router.get("/proposals",
+  [
+    authenticateToken,
+  ],
+  getAllProposals
+)
+
+router.get("/sent-proposals",
+  [
+    authenticateToken,
+  ],
+  getAllSentProposals
 )
 
 export default router;

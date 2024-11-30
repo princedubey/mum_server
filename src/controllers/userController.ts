@@ -279,6 +279,7 @@ export const findMatchingUser = async (req: Request, res: Response, next: NextFu
   try {
     const id: string = (req.user as JwtPayload)._id;
     const user = await UserModel.findById(id);
+    console.log(id);
 
     if (!user) {
       res.status(404).json({
@@ -288,29 +289,35 @@ export const findMatchingUser = async (req: Request, res: Response, next: NextFu
       return;
     }
 
-    const matchingUsers = await UserModel.aggregate(
-      [
-        {
-          $match: {
-            _id: { $ne: id },
-            tags: { $in: user.tags }
-          }
+    const matchingUsers = await UserModel.aggregate([
+      {
+        $match: {
+          tags: { $in: user.tags },
+          _id: { $ne: user._id }, // Exclude the user itself
         },
-        {
-          $addFields: {
-            score: { $size: { $filter: { input: "$tags", as: "tag", cond: { $in: ["$$tag", user.tags] } } } }
-          }
+      },
+      {
+        $addFields: {
+          score: {
+            $size: {
+              $filter: {
+                input: "$tags",
+                as: "tag",
+                cond: { $in: ["$$tag", user.tags] },
+              },
+            },
+          },
         },
-        {
-          $sort: { score: -1 }
-        }
-      ]
-    );
+      },
+      {
+        $sort: { score: -1 },
+      },
+    ]);
 
     res.status(200).json({
       success: true,
       message: "Matching users fetched successfully",
-      data: matchingUsers
+      data: matchingUsers,
     });
   } catch (error) {
     next(error);

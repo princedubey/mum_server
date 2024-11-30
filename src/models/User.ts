@@ -174,7 +174,7 @@ const userSchema = new Schema<IUser>(
     tags: [{ type: String }],
     password:{type:String,required:true}
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 const UserModel = mongoose.models.User || model<IUser>("User", userSchema);
