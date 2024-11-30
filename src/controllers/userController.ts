@@ -64,11 +64,11 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       throw new AppError("User not found",404)
     }
 
-    // // Check password
-    // const isMatch = await bcrypt.compare(password, user.contactInfo.password);
-    // if (!isMatch) {
-    //   throw new AppError("Invalid email or password",404)
-    // }
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.contactInfo.password);
+    if (!isMatch) {
+      throw new AppError("Invalid email or password",404)
+    }
 
     // Generate JWT tokens
     const accessToken = generateToken(user);
